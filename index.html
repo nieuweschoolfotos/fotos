@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html lang="nl" class="dark">
 <head>
+  <script>
+    tailwind = {
+      config: {
+        darkMode: 'class'
+      }
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<script>
-  tailwind = {
-    config: {
-      darkMode: 'class'
-    }
-  };
-</script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-  
   <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/nieuweschoolfotos/nieuweschoolfotos/main/favicon.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,7 +48,7 @@
       <!-- SAĞ ÜST: TEMA VE PRINT BUTONLARI -->
       <div class="flex items-center space-x-3">
         <button type="button" id="theme-toggle-btn" aria-label="Wissel licht/donker thema" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 flex items-center justify-center transition">
-          <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+          <i id="theme-icon" class="fa-solid fa-moon text-lg text-yellow-400"></i>
         </button>
 
         <button onclick="openPrintModal()" class="text-xs md:text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center gap-2">
@@ -66,16 +64,15 @@
 
     <!-- PAGINA 1: HOME -->
     <section id="page-home" class="fade-in text-center py-16 flex flex-col items-center">
-
       <h1 class="text-4xl md:text-6xl font-black tracking-tight max-w-3xl leading-tight mb-6">
-        schoolfoto's <span class="bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent">gratis bekijken</span> &amp; bestellen
+        schoolfoto's <span class="bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent">gratis bekijken</span> & bestellen
       </h1>
 
       <p class="text-slate-600 dark:text-slate-400 text-lg max-w-xl mb-10 leading-relaxed">
         Kies hieronder je categorie, selecteer de gewenste foto's en stuur direct een printaanvraag!
       </p>
 
-      <button onclick="navigateTo('page-selection')" class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-600/20 transition">
+      <button onclick="navigateTo('page-selection')" class="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-600/20 transition flex items-center gap-3">
         <span>Starten</span>
         <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
       </button>
@@ -132,7 +129,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="refreshData()" title="Verversen" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-2">
+          <button onclick="refreshData()" title="Verversen" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-2 text-xs font-semibold">
             <i class="fa-solid fa-rotate-right"></i> <span class="hidden sm:inline">Verversen</span>
           </button>
           <div id="years-bar" class="flex gap-2 overflow-x-auto pb-2 md:pb-0"></div>
@@ -227,7 +224,7 @@
           </div>
           <div>
             <h3 id="modal-photo-name" class="text-lg md:text-xl font-bold text-slate-900 dark:text-white">Foto</h3>
-            <p id="modal-photo-info" class="text-xs text-slate-500 dark:text-slate-400">Achtergrond- &amp; versiedetails</p>
+            <p id="modal-photo-info" class="text-xs text-slate-500 dark:text-slate-400">Achtergrond- & versiedetails</p>
           </div>
         </div>
         <button onclick="closeDetailModal()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:hover:text-white transition">
@@ -250,8 +247,7 @@
           <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2.5">
             Beschikbare Achtergronden (<span id="modal-version-count">1</span>)
           </h4>
-          <div id="modal-versions-list" class="flex gap-3 overflow-x-auto pb-2 pt-1">
-          </div>
+          <div id="modal-versions-list" class="flex gap-3 overflow-x-auto pb-2 pt-1"></div>
         </div>
       </div>
 
@@ -353,20 +349,26 @@
       }
     }
 
-    const isLocalEnv = window.location.protocol === 'file:' || 
-                       window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1';
-
     let driveData = { school: {}, eigen: {} };
     let isDataLoaded = false;
     let isFetching = false;
     let currentCategory = 'school';
     let currentYear = '';
     let selectedStudent = null;
+    let pendingStudent = null;
     let selectedPhotos = [];
 
     let currentDetailPhoto = null;
     let currentDetailVersionIdx = 0;
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"]/g, c => ({
+        '&': '&',
+        '<': '<',
+        '>': '>',
+        '"': '"'
+      }[c]));
+    }
 
     function formatBgLabel(filename) {
       let clean = filename.replace(/\.[^.]+$/, '');
@@ -396,17 +398,26 @@
 
       try {
         localStorage.setItem('schoolfotos-theme', dark ? 'dark' : 'light');
-      } catch (error) {
-        // Thema werkt ook wanneer opslag door de browser is geblokkeerd.
-      }
+      } catch (error) {}
     }
 
     function toggleTheme() {
-      const nextTheme = document.documentElement.classList.contains('dark')
-        ? 'light'
-        : 'dark';
+      const nextTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
       applyTheme(nextTheme);
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      let savedTheme = 'dark';
+      try {
+        savedTheme = localStorage.getItem('schoolfotos-theme') || 'dark';
+      } catch (e) {}
+      applyTheme(savedTheme);
+
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', toggleTheme);
+      }
+    });
 
     async function initData() {
       isDataLoaded = false;
@@ -540,7 +551,7 @@
         if (gallery) {
           gallery.innerHTML = `<div class="text-center py-12 text-red-400">
             <p class="font-semibold mb-2">Foto's konden niet worden geladen.</p>
-            <p class="text-sm">${String(err.message || err).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</p>
+            <p class="text-sm">${escapeHtml(err.message || err)}</p>
             <p class="text-xs mt-3 text-slate-500">Controleer je internetverbinding en de GitHub-repository.</p>
           </div>`;
         }
@@ -622,6 +633,49 @@
       renderYearsBar();
     }
 
+    function renderPhotoCard(p) {
+      const verIdx = p.activeVersionIndex || 0;
+      const activeVer = p.versions[verIdx] || p.versions[0];
+      if (!activeVer) return '';
+
+      const isSelected = selectedPhotos.some(sp => sp.photoId === p.id && sp.versionIdx === verIdx);
+
+      return `
+        <div class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition group flex flex-col">
+          <div onclick="openDetailModal('${p.id}')" class="relative h-60 bg-slate-950 overflow-hidden cursor-pointer">
+            <img src="${activeVer.url}" onerror="this.onerror=null;this.src='${activeVer.backupUrl}'" alt="${escapeHtml(p.name)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            ${p.versions.length > 1 ? `
+              <span class="absolute top-3 left-3 bg-slate-950/75 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/10">
+                <i class="fa-solid fa-layer-group text-blue-400 mr-1"></i> ${p.versions.length} achtergronden
+              </span>
+            ` : ''}
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition flex items-end p-4">
+              <span class="text-white text-xs font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-expand"></i> Klik om te vergroten
+              </span>
+            </div>
+          </div>
+
+          <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+            <div>
+              <h3 class="font-bold text-base text-slate-900 dark:text-white truncate">${escapeHtml(p.name)}</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 truncate">${escapeHtml(activeVer.backgroundName)}</p>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <button onclick="openDetailModal('${p.id}')" class="flex-1 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-semibold transition">
+                Bekijken
+              </button>
+              <button onclick="togglePhotoSelect('${p.id}', ${verIdx})" class="py-2 px-3 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${isSelected ? 'bg-emerald-600 text-white' : 'bg-blue-600/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white'}">
+                <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-print'}"></i>
+                <span>${isSelected ? 'Geselecteerd' : 'Selecteer'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderGalleryContent() {
       const container = document.getElementById('gallery-content');
       const subtitle = document.getElementById('gallery-subtitle');
@@ -637,183 +691,82 @@
 
         container.innerHTML = `
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            ${photos.map((p, idx) => {
-              const activeVer = p.versions[p.activeVersionIndex || 0] || p.versions[0];
-              const isSelected = selectedPhotos.some(sp => sp.photoId === p.id && sp.versionIdx === (p.activeVersionIndex || 0));
-              return `
-                <div class="bg-white dark:bg-slate-800/70 border ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-200 dark:border-slate-800'} rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
-                  <div onclick="openDetailModal('school', '${currentYear}', ${idx})" class="relative aspect-[4/3] bg-slate-950 overflow-hidden cursor-pointer">
-                    <img src="${activeVer.url}" onerror="this.src='${activeVer.backupUrl}'" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                    <div class="absolute top-3 left-3 bg-slate-950/75 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 border border-white/10">
-                      <i class="fa-solid fa-layer-group text-blue-400"></i>
-                      <span>${p.versions.length} achtergronden</span>
-                    </div>
-                  </div>
-                  <div class="p-4 flex items-center justify-between gap-2">
-                    <div onclick="openDetailModal('school', '${currentYear}', ${idx})" class="cursor-pointer">
-                      <h3 class="font-bold text-base text-slate-900 dark:text-white">${p.name}</h3>
-                      <p class="text-xs text-slate-500 dark:text-slate-400">Klik voor details (${p.versions.length} opties)</p>
-                    </div>
-                    <button onclick="toggleQuickSelect('school', '${currentYear}', ${idx})" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'}">
-                      <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-print'}"></i>
-                      <span>${isSelected ? 'Gekozen' : 'Print'}</span>
-                    </button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
+            ${photos.map(p => renderPhotoCard(p)).join('')}
           </div>
         `;
       } else {
         const students = (driveData.eigen && driveData.eigen[currentYear]) || [];
 
         if (!selectedStudent) {
-          subtitle.textContent = `Jaar ${currentYear} • Selecteer jouw naam`;
+          subtitle.textContent = `Jaar ${currentYear} • ${students.length} personen`;
           container.innerHTML = `
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              ${students.map((s, idx) => `
-                <div onclick="openPasswordModal(${idx})" class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 hover:border-indigo-500 rounded-2xl p-5 cursor-pointer transition group">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+              ${students.map((st, i) => `
+                <div onclick="openPasswordModal(${i})" class="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 hover:border-indigo-500/50 rounded-2xl p-5 cursor-pointer transition flex items-center justify-between group">
                   <div class="flex items-center gap-3.5">
-                    <div class="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-lg group-hover:scale-110 transition">
-                      <i class="fa-solid fa-user-lock"></i>
+                    <div class="w-11 h-11 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center text-lg group-hover:scale-105 transition">
+                      <i class="fa-solid fa-folder-closed"></i>
                     </div>
                     <div>
-                      <h4 class="font-bold text-sm text-slate-900 dark:text-white">${s.student}</h4>
-                      <p class="text-xs text-slate-500">${s.photos.length} foto's</p>
+                      <h4 class="font-bold text-sm text-slate-900 dark:text-white">${escapeHtml(st.student)}</h4>
+                      <p class="text-xs text-slate-500">${st.photos.length} foto's</p>
                     </div>
                   </div>
-                  <i class="fa-solid fa-chevron-right text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-1 transition text-xs"></i>
+                  <i class="fa-solid fa-lock text-slate-400 group-hover:text-indigo-500 transition"></i>
                 </div>
               `).join('')}
             </div>
-            <div class="mt-8 text-center">
-              <button onclick="openMissingCodeModal()" class="text-xs font-semibold text-indigo-500 hover:text-indigo-400 underline">
-                Ik sta er niet tussen (Inlogcode opvragen)
+
+            <div class="text-center pt-4 border-t border-slate-200 dark:border-slate-800">
+              <button onclick="openMissingCodeModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold transition">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>Ik sta er niet tussen (Inlogcode invoeren)</span>
               </button>
             </div>
           `;
         } else {
-          subtitle.textContent = `${selectedStudent.student} (${currentYear})`;
-          const photos = selectedStudent.photos || [];
+          subtitle.textContent = `Jaar ${currentYear} • Map van ${selectedStudent.student}`;
           container.innerHTML = `
-            <div class="mb-6">
-              <button onclick="selectedStudent = null; renderGalleryContent();" class="text-xs font-bold text-indigo-500 hover:underline flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-left"></i> Terug naar namenlijst
+            <div class="mb-6 flex items-center justify-between bg-indigo-500/10 border border-indigo-500/20 rounded-2xl p-4">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-folder-open text-indigo-500 text-xl"></i>
+                <div>
+                  <h3 class="font-bold text-sm text-slate-900 dark:text-white">${escapeHtml(selectedStudent.student)}</h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">${selectedStudent.photos.length} persoonlijke foto's</p>
+                </div>
+              </div>
+              <button onclick="selectedStudent = null; renderGalleryContent();" class="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-800 text-xs font-semibold shadow-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                <i class="fa-solid fa-arrow-left mr-1"></i> Alle personen
               </button>
             </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              ${photos.map((p, idx) => {
-                const activeVer = p.versions[0];
-                const isSelected = selectedPhotos.some(sp => sp.photoId === p.id && sp.versionIdx === 0);
-                return `
-                  <div class="bg-white dark:bg-slate-800/70 border ${isSelected ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-slate-200 dark:border-slate-800'} rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
-                    <div onclick="openDetailModal('eigen', '${currentYear}', ${idx})" class="relative aspect-[3/4] bg-slate-950 overflow-hidden cursor-pointer">
-                      <img src="${activeVer.url}" onerror="this.src='${activeVer.backupUrl}'" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                    </div>
-                    <div class="p-4 flex items-center justify-between gap-2">
-                      <div onclick="openDetailModal('eigen', '${currentYear}', ${idx})" class="cursor-pointer">
-                        <h3 class="font-bold text-base text-slate-900 dark:text-white">${p.name}</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Klik voor details</p>
-                      </div>
-                      <button onclick="toggleQuickSelect('eigen', '${currentYear}', ${idx})" class="px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'}">
-                        <i class="fa-solid ${isSelected ? 'fa-check' : 'fa-print'}"></i>
-                        <span>${isSelected ? 'Gekozen' : 'Print'}</span>
-                      </button>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
+              ${selectedStudent.photos.map(p => renderPhotoCard(p)).join('')}
             </div>
           `;
         }
       }
     }
 
-    function openPasswordModal(studentIdx) {
-      const students = driveData.eigen[currentYear] || [];
-      selectedStudent = students[studentIdx];
-      if (!selectedStudent) return;
-
-      document.getElementById('pass-student-name').textContent = selectedStudent.student;
-      document.getElementById('student-pass-input').value = '';
-      document.getElementById('pass-error').classList.add('hidden');
-      document.getElementById('password-modal').classList.remove('hidden');
-      document.getElementById('password-modal').classList.add('flex');
-      setTimeout(() => document.getElementById('student-pass-input').focus(), 100);
-    }
-
-    function closePasswordModal() {
-      document.getElementById('password-modal').classList.add('hidden');
-      document.getElementById('password-modal').classList.remove('flex');
-    }
-
-    function verifyPassword(e) {
-      e.preventDefault();
-      const inputVal = document.getElementById('student-pass-input').value.trim();
-      if (selectedStudent && inputVal === String(selectedStudent.password).trim()) {
-        closePasswordModal();
-        renderGalleryContent();
-      } else {
-        document.getElementById('pass-error').classList.remove('hidden');
+    function findPhotoById(photoId) {
+      if (currentCategory === 'school') {
+        return ((driveData.school && driveData.school[currentYear]) || []).find(p => p.id === photoId);
+      } else if (selectedStudent) {
+        return selectedStudent.photos.find(p => p.id === photoId);
       }
+      return null;
     }
 
-    function openMissingCodeModal() {
-      document.getElementById('missing-code-input').value = '';
-      document.getElementById('missing-name-input').value = '';
-      document.getElementById('missing-email-input').value = '';
-      document.getElementById('missing-code-modal').classList.remove('hidden');
-      document.getElementById('missing-code-modal').classList.add('flex');
-    }
+    function openDetailModal(photoId) {
+      const photo = findPhotoById(photoId);
+      if (!photo) return;
 
-    function closeMissingCodeModal() {
-      document.getElementById('missing-code-modal').classList.add('hidden');
-      document.getElementById('missing-code-modal').classList.remove('flex');
-    }
+      currentDetailPhoto = photo;
+      currentDetailVersionIdx = photo.activeVersionIndex || 0;
 
-    function submitMissingCode(e) {
-      e.preventDefault();
-      const code = document.getElementById('missing-code-input').value;
-      const name = document.getElementById('missing-name-input').value;
-      const email = document.getElementById('missing-email-input').value.trim();
-      if (!code.trim() || !name.trim() || !email) {
-        alert('Vul alle verplichte velden in.');
-        return;
-      }
-
-      const subject = encodeURIComponent(`Inlogcode opvragen: ${code} - ${name}`);
-      const body = encodeURIComponent(`Beste beheerder,\n\nIk kon mijn foto's niet vinden.\nNaam leerling: ${name}\nInlogcode: ${code}\nE-mail: ${email}\n\nGraag handmatig nakijken.`);
-      window.location.href = `mailto:tolgaoruc2016@gmail.com?subject=${subject}&body=${body}`;
-      closeMissingCodeModal();
-    }
-
-    function openDetailModal(category, year, photoIdx) {
-      let photoList = [];
-      if (category === 'school') {
-        photoList = driveData.school[year] || [];
-      } else {
-        photoList = selectedStudent ? selectedStudent.photos : [];
-      }
-
-      currentDetailPhoto = photoList[photoIdx];
-      if (!currentDetailPhoto) return;
-
-      currentDetailVersionIdx = currentDetailPhoto.activeVersionIndex || 0;
-
-      document.getElementById('modal-photo-name').textContent = currentDetailPhoto.name;
-
-      const versionsSection = document.getElementById('modal-versions-section');
-      const bgBadge = document.getElementById('modal-bg-badge');
-
-      if (category === 'school') {
-        versionsSection.classList.remove('hidden');
-        bgBadge.classList.remove('hidden');
-        document.getElementById('modal-photo-info').textContent = `${currentDetailPhoto.versions.length} beschikbare achtergronden`;
-      } else {
-        versionsSection.classList.add('hidden');
-        bgBadge.classList.add('hidden');
-        document.getElementById('modal-photo-info').textContent = 'Persoonlijke foto';
-      }
+      document.getElementById('modal-photo-name').textContent = photo.name;
+      document.getElementById('modal-photo-info').textContent = `Jaar ${photo.year}${photo.student ? ' • ' + photo.student : ''}`;
+      document.getElementById('modal-version-count').textContent = photo.versions.length;
 
       updateDetailModalView();
 
@@ -825,190 +778,224 @@
     function updateDetailModalView() {
       if (!currentDetailPhoto) return;
       const ver = currentDetailPhoto.versions[currentDetailVersionIdx] || currentDetailPhoto.versions[0];
+      currentDetailPhoto.activeVersionIndex = currentDetailVersionIdx;
 
-      const imgEl = document.getElementById('modal-main-img');
-      imgEl.src = ver.url;
-      imgEl.onerror = function() { this.src = ver.backupUrl; };
+      const mainImg = document.getElementById('modal-main-img');
+      mainImg.src = ver.url;
+      mainImg.onerror = function() {
+        this.onerror = null;
+        this.src = ver.backupUrl;
+      };
 
       document.getElementById('modal-active-bg-name').textContent = `Achtergrond: ${ver.backgroundName}`;
-      document.getElementById('modal-version-count').textContent = currentDetailPhoto.versions.length;
 
-      const listEl = document.getElementById('modal-versions-list');
-      listEl.innerHTML = currentDetailPhoto.versions.map((v, vIdx) => `
-        <div onclick="switchDetailVersion(${vIdx})" class="flex-shrink-0 w-24 h-20 rounded-xl overflow-hidden border-2 cursor-pointer transition ${vIdx === currentDetailVersionIdx ? 'border-blue-500' : 'border-white/10'}">
-          <img src="${v.url}" onerror="this.src='${v.backupUrl}'" class="w-full h-full object-cover">
-        </div>
+      const versionsList = document.getElementById('modal-versions-list');
+      versionsList.innerHTML = currentDetailPhoto.versions.map((v, idx) => `
+        <button onclick="selectDetailVersion(${idx})" class="flex-shrink-0 rounded-xl overflow-hidden border-2 transition p-1 bg-slate-100 dark:bg-slate-800 ${idx === currentDetailVersionIdx ? 'border-blue-500 ring-2 ring-blue-500/30' : 'border-transparent opacity-70 hover:opacity-100'}">
+          <img src="${v.url}" onerror="this.onerror=null;this.src='${v.backupUrl}'" alt="${escapeHtml(v.backgroundName)}" class="w-20 h-14 object-cover rounded-lg">
+          <p class="text-[10px] font-semibold mt-1 truncate max-w-[80px]">${escapeHtml(v.backgroundName)}</p>
+        </button>
       `).join('');
 
       const isSelected = selectedPhotos.some(sp => sp.photoId === currentDetailPhoto.id && sp.versionIdx === currentDetailVersionIdx);
       const printBtn = document.getElementById('modal-select-print-btn');
       const printLabel = document.getElementById('modal-print-label');
+
       if (isSelected) {
-        printBtn.className = "flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition";
-        printLabel.textContent = "Geselecteerd voor print";
+        printBtn.className = 'flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs md:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition';
+        printLabel.textContent = 'Geselecteerd voor print';
       } else {
-        printBtn.className = "flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs md:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition";
-        printLabel.textContent = "Selecteren voor print";
+        printBtn.className = 'flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs md:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition';
+        printLabel.textContent = 'Selecteren voor print';
       }
     }
 
-    function switchDetailVersion(vIdx) {
-      currentDetailVersionIdx = vIdx;
-      currentDetailPhoto.activeVersionIndex = vIdx;
+    function selectDetailVersion(idx) {
+      currentDetailVersionIdx = idx;
       updateDetailModalView();
       renderGalleryContent();
     }
 
     function closeDetailModal() {
-      document.getElementById('detail-modal').classList.add('hidden');
-      document.getElementById('detail-modal').classList.remove('flex');
-      currentDetailPhoto = null;
+      const modal = document.getElementById('detail-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
     }
 
-    function downloadCurrentModalPhoto() {
+    async function downloadCurrentModalPhoto() {
       if (!currentDetailPhoto) return;
       const ver = currentDetailPhoto.versions[currentDetailVersionIdx] || currentDetailPhoto.versions[0];
-      const a = document.createElement('a');
-      a.href = ver.url;
-      a.download = `${currentDetailPhoto.name}_${ver.backgroundName}.jpg`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      try {
+        const response = await fetch(ver.url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = ver.fileName || `${currentDetailPhoto.name}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+      } catch (e) {
+        window.open(ver.url, '_blank');
+      }
+    }
+
+    function togglePhotoSelect(photoId, versionIdx) {
+      const photo = findPhotoById(photoId);
+      if (!photo) return;
+      const ver = photo.versions[versionIdx] || photo.versions[0];
+
+      const existingIndex = selectedPhotos.findIndex(sp => sp.photoId === photoId && sp.versionIdx === versionIdx);
+      if (existingIndex > -1) {
+        selectedPhotos.splice(existingIndex, 1);
+      } else {
+        selectedPhotos.push({
+          photoId: photo.id,
+          versionIdx: versionIdx,
+          name: photo.name,
+          year: photo.year,
+          student: photo.student || '',
+          backgroundName: ver.backgroundName,
+          fileName: ver.fileName
+        });
+      }
+
+      document.getElementById('selected-count').textContent = selectedPhotos.length;
+      renderGalleryContent();
     }
 
     function toggleModalPrintSelect() {
       if (!currentDetailPhoto) return;
-      const existingIdx = selectedPhotos.findIndex(sp => sp.photoId === currentDetailPhoto.id && sp.versionIdx === currentDetailVersionIdx);
-      const ver = currentDetailPhoto.versions[currentDetailVersionIdx] || currentDetailPhoto.versions[0];
-
-      if (existingIdx > -1) {
-        selectedPhotos.splice(existingIdx, 1);
-      } else {
-        selectedPhotos.push({
-          photoId: currentDetailPhoto.id,
-          name: `${currentDetailPhoto.name} (${ver.backgroundName})`,
-          url: ver.url,
-          versionIdx: currentDetailVersionIdx
-        });
-      }
-
-      updateSelectedCount();
+      togglePhotoSelect(currentDetailPhoto.id, currentDetailVersionIdx);
       updateDetailModalView();
-      renderGalleryContent();
-    }
-
-    function toggleQuickSelect(category, year, photoIdx) {
-      let photoList = (category === 'school') ? (driveData.school[year] || []) : (selectedStudent ? selectedStudent.photos : []);
-      const p = photoList[photoIdx];
-      if (!p) return;
-
-      const vIdx = p.activeVersionIndex || 0;
-      const ver = p.versions[vIdx] || p.versions[0];
-
-      const existingIdx = selectedPhotos.findIndex(sp => sp.photoId === p.id && sp.versionIdx === vIdx);
-      if (existingIdx > -1) {
-        selectedPhotos.splice(existingIdx, 1);
-      } else {
-        selectedPhotos.push({
-          photoId: p.id,
-          name: `${p.name} (${ver.backgroundName})`,
-          url: ver.url,
-          versionIdx: vIdx
-        });
-      }
-
-      updateSelectedCount();
-      renderGalleryContent();
-    }
-
-    function updateSelectedCount() {
-      document.getElementById('selected-count').textContent = selectedPhotos.length;
     }
 
     function openPrintModal() {
       const listEl = document.getElementById('order-selected-list');
       if (selectedPhotos.length === 0) {
-        listEl.innerHTML = `<p class="text-slate-400 text-center py-2">Geen foto's geselecteerd.</p>`;
+        listEl.innerHTML = `<p class="text-slate-500 italic">Je hebt nog geen foto's geselecteerd.</p>`;
       } else {
-        listEl.innerHTML = selectedPhotos.map((sp, idx) => `
-          <div class="flex items-center justify-between bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-            <span class="font-medium text-slate-800 dark:text-slate-200">${idx + 1}. ${sp.name}</span>
-            <button onclick="removeSelectedPhoto(${idx})" class="text-red-500 hover:text-red-400 p-1">
-              <i class="fa-solid fa-trash text-xs"></i>
+        listEl.innerHTML = selectedPhotos.map((item, idx) => `
+          <div class="flex items-center justify-between bg-white dark:bg-slate-900 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-800">
+            <div>
+              <span class="font-bold">${escapeHtml(item.name)}</span>
+              <span class="text-slate-500"> (${escapeHtml(item.backgroundName)} - ${item.year})</span>
+            </div>
+            <button type="button" onclick="removeSelectedPhoto(${idx})" class="text-red-400 hover:text-red-500 ml-2">
+              <i class="fa-solid fa-trash"></i>
             </button>
           </div>
         `).join('');
       }
 
-      document.getElementById('print-modal').classList.remove('hidden');
-      document.getElementById('print-modal').classList.add('flex');
-    }
-
-    function closePrintModal() {
-      document.getElementById('print-modal').classList.add('hidden');
-      document.getElementById('print-modal').classList.remove('flex');
+      const modal = document.getElementById('print-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     }
 
     function removeSelectedPhoto(idx) {
       selectedPhotos.splice(idx, 1);
-      updateSelectedCount();
+      document.getElementById('selected-count').textContent = selectedPhotos.length;
       openPrintModal();
       renderGalleryContent();
     }
 
+    function closePrintModal() {
+      const modal = document.getElementById('print-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
     function submitPrintOrder(e) {
       e.preventDefault();
-      const name = document.getElementById('order-name').value;
-      const paperType = document.getElementById('order-paper-type').value;
-
       if (selectedPhotos.length === 0) {
-        alert("Selecteer eerst minstens één foto!");
+        alert("Selecteer eerst minimaal één foto om te printen.");
         return;
       }
 
-      const photoListText = selectedPhotos.map((sp, i) => `${i + 1}. ${sp.name} (${sp.url})`).join('\n');
-      const subject = encodeURIComponent(`Printaanvraag van ${name}`);
-      const body = encodeURIComponent(`Beste beheerder,\n\nNaam: ${name}\nFormaat: ${paperType}\n\nGeselecteerde foto's:\n${photoListText}\n\nGraag printen.`);
+      const name = document.getElementById('order-name').value.trim();
+      const paperType = document.getElementById('order-paper-type').value;
+      const photoLines = selectedPhotos.map((p, i) => `${i + 1}. ${p.name} (${p.backgroundName}) - Jaar: ${p.year}`).join('\n');
 
-      window.location.href = `mailto:tolgaoruc2016@gmail.com?subject=${subject}&body=${body}`;
+      const subject = encodeURIComponent(`Printaanvraag Schoolfoto's - ${name}`);
+      const body = encodeURIComponent(
+        `Hallo,\n\nHierbij mijn printaanvraag:\n\n` +
+        `Naam: ${name}\n` +
+        `Papierformaat / Type: ${paperType}\n\n` +
+        `Geselecteerde foto's:\n${photoLines}\n\n` +
+        `Met vriendelijke groet,\n${name}`
+      );
+
+      window.location.href = `mailto:info@nieuweschoolfoto.nl?subject=${subject}&body=${body}`;
       closePrintModal();
     }
 
-    Object.assign(window, {
-      navigateTo, toggleTheme, openPrintModal, closePrintModal,
-      selectCategory, refreshData, selectYear, openPasswordModal,
-      closePasswordModal, verifyPassword, openMissingCodeModal,
-      closeMissingCodeModal, submitMissingCode, openDetailModal,
-      updateDetailModalView, switchDetailVersion, closeDetailModal,
-      downloadCurrentModalPhoto, toggleModalPrintSelect,
-      toggleQuickSelect, updateSelectedCount, removeSelectedPhoto,
-      submitPrintOrder
-    });
+    function openPasswordModal(studentIndex) {
+      const students = (driveData.eigen && driveData.eigen[currentYear]) || [];
+      pendingStudent = students[studentIndex];
+      if (!pendingStudent) return;
 
-    window.addEventListener('DOMContentLoaded', function() {
-      const themeButton = document.getElementById('theme-toggle-btn');
+      document.getElementById('pass-student-name').textContent = pendingStudent.student;
+      document.getElementById('student-pass-input').value = '';
+      document.getElementById('pass-error').classList.add('hidden');
 
-      if (themeButton) {
-        themeButton.addEventListener('click', function(event) {
-          event.preventDefault();
-          toggleTheme();
-        });
+      const modal = document.getElementById('password-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePasswordModal() {
+      const modal = document.getElementById('password-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function verifyPassword(e) {
+      e.preventDefault();
+      if (!pendingStudent) return;
+
+      const entered = document.getElementById('student-pass-input').value.trim();
+      if (!pendingStudent.password || entered === pendingStudent.password) {
+        selectedStudent = pendingStudent;
+        closePasswordModal();
+        renderGalleryContent();
+      } else {
+        document.getElementById('pass-error').classList.remove('hidden');
       }
+    }
 
-      let savedTheme = null;
-      try {
-        savedTheme = localStorage.getItem('schoolfotos-theme');
-      } catch (error) {
-        savedTheme = null;
-      }
+    function openMissingCodeModal() {
+      const modal = document.getElementById('missing-code-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
 
-      applyTheme(savedTheme === 'light' || savedTheme === 'dark'
-        ? savedTheme
-        : 'dark');
+    function closeMissingCodeModal() {
+      const modal = document.getElementById('missing-code-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
 
-      updateSelectedCount();
-      initData();
-    });
+    function submitMissingCode(e) {
+      e.preventDefault();
+      const code = document.getElementById('missing-code-input').value.trim();
+      const childName = document.getElementById('missing-name-input').value.trim();
+      const email = document.getElementById('missing-email-input').value.trim();
+
+      const subject = encodeURIComponent(`Aanvraag persoonlijke foto's - ${childName}`);
+      const body = encodeURIComponent(
+        `Hallo,\n\nIk sta niet in de lijst en wil graag mijn persoonlijke schoolfoto's opvragen:\n\n` +
+        `Inlogcode: ${code}\n` +
+        `Naam kind / leerling: ${childName}\n` +
+        `E-mailadres: ${email}\n` +
+        `Jaar: ${currentYear}\n\n` +
+        `Alvast bedankt!`
+      );
+
+      window.location.href = `mailto:info@nieuweschoolfoto.nl?subject=${subject}&body=${body}`;
+      closeMissingCodeModal();
+    }
   </script>
 </body>
 </html>
